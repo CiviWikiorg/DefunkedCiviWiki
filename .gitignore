@@ -7,3 +7,4 @@
 # Python Files
 *.pyc
 civiwiki/civiwiki/media
+civiwiki/utils/db_info.py
