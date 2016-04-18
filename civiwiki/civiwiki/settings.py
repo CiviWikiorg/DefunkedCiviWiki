@@ -10,24 +10,27 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from utils.db_info import DATABASES as database_creds
-import os
+import os, json
+from django.core.exceptions import ImproperlyConfigured
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
+with open(os.path.join(BASE_DIR, "utils/secrets.json")) as f:
+    secrets = json.loads(f.read())
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'st9-h5vqc8&#b7k@7(_orp5ub7z^yecmj-fv+99k60-_5wy7qy'
+def get_secret(setting, secrets=secrets):
+    if secrets:
+        try:
+            return secrets[setting]
+        except KeyError:
+            error = "{setting} is not a key in the secrets.json file".format(setting=setting)
+            raise ImproperlyConfigured(error)
+    else:
+        error = "Please configure your secrets.json file".format(setting=setting)
+        raise ImproperlyConfigured(error)
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+SECRET_KEY = get_secret("SECRET_KEY")
 ALLOWED_HOSTS = []
 
-
-# Application definition
 
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -37,13 +40,11 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'api',
 	'corsheaders',
-    # 'django.contrib.messages',
 )
 
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware', TODO: uncomment and fix eventually
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -51,6 +52,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 	'corsheaders.middleware.CorsMiddleware',
 )
+
 CORS_ORIGIN_ALLOW_ALL = True
 ROOT_URLCONF = 'civiwiki.urls'
 
@@ -72,14 +74,10 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'civiwiki.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-DEBUG = True
-BASE_URL = 'localhost:8000'
 if 'RDS_DB_NAME' in os.environ:
-    BASE_URL = 'civiwiki.org'
+
     DATABASE = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -90,32 +88,30 @@ if 'RDS_DB_NAME' in os.environ:
             'PORT': os.enviorn['RDS_PORT']
         }
     }
-elif 'CIVIWIKI_LOCAL' in os.environ and int(os.environ['CIVIWIKI_LOCAL']):
-    DATABASES = {
-        'default': {
-            'HOST':'localhost',
-            'PORT': '5432',
-            'NAME': 'civiwiki_local',
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'USER': 'civiwiki',
-            'PASSWORD': 'changecivic2',
-        },
-    }
-    print 'Database: localhost '
+
 else:
-    DATABASES = database_creds
-    print 'Database: Custom'
+
+    DEBUG = True
+
+    DATABASES = {
+        "default": {
+            "HOST": get_secret("DATABASE_HOST"),
+            "POST": get_secret("DATABASE_PORT"),
+            "NAME": get_secret("DATABASE_NAME"),
+            "ENGINE": get_secret("DATABASE_ENGINE"),
+            "USER": get_secret("DATABASE_USER"),
+            "PASSWORD": get_secret("DATABASE_PASSWORD")
+        }
+    }
+
+
+EMAIL_HOST = get_secret("EMAIL_HOST")
+EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = get_secret("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = get_secret("EMAIL_PORT")
+EMAIL_USE_TLS = get_secret("EMAIL_USE_TLS")
 
 LOGIN_URL = '/login'
-
-# Email settings
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'mitchell.west@civiwiki.org'
-EMAIL_HOST_PASSWORD = 'Hamilton8'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'mitchell.west@civiwiki.org'
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
