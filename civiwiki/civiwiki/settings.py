@@ -18,12 +18,17 @@ with open(os.path.join(BASE_DIR, "utils/secrets.json")) as f:
     secrets = json.loads(f.read())
 
 def get_secret(setting, secrets=secrets):
-    if secrets:
+    if 'RDS_DB_NAME' in os.environ:
+        return os.environ[setting]
+
+    elif secrets:
+
         try:
             return secrets[setting]
         except KeyError:
             error = "{setting} is not a key in the secrets.json file".format(setting=setting)
             raise ImproperlyConfigured(error)
+
     else:
         error = "Please configure your secrets.json file".format(setting=setting)
         raise ImproperlyConfigured(error)
@@ -76,34 +81,18 @@ WSGI_APPLICATION = 'civiwiki.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-if 'RDS_DB_NAME' in os.environ:
 
-    DATABASE = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': os.enviorn['RDS_DB_NAME'],
-            'USER': os.enviorn['RDS_USERNAME'],
-            'PASSWORD': os.enviorn['RDS_PASSWORD'],
-            'HOST': os.enviorn['RDS_HOSTNAME'],
-            'PORT': os.enviorn['RDS_PORT']
-        }
+
+DATABASES = {
+    "default": {
+        "HOST": get_secret("DATABASE_HOST"),
+        "POST": get_secret("DATABASE_PORT"),
+        "NAME": get_secret("DATABASE_NAME"),
+        "ENGINE": get_secret("DATABASE_ENGINE"),
+        "USER": get_secret("DATABASE_USER"),
+        "PASSWORD": get_secret("DATABASE_PASSWORD")
     }
-
-else:
-
-    DEBUG = True
-
-    DATABASES = {
-        "default": {
-            "HOST": get_secret("DATABASE_HOST"),
-            "POST": get_secret("DATABASE_PORT"),
-            "NAME": get_secret("DATABASE_NAME"),
-            "ENGINE": get_secret("DATABASE_ENGINE"),
-            "USER": get_secret("DATABASE_USER"),
-            "PASSWORD": get_secret("DATABASE_PASSWORD")
-        }
-    }
-
+}
 
 EMAIL_HOST = get_secret("EMAIL_HOST")
 EMAIL_HOST_USER = get_secret("EMAIL_HOST_USER")
