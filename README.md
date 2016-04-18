@@ -37,4 +37,5 @@ I want to keep track of how Civiwiki is doing.
 #### Contact info
 
 * **Twitter:** [@CiviWiki](https://twitter.com/civiwiki)
-* **Web:** http://civiwiki.launchrock.com/
+* **Web:** http://civiwiki.org/
+* **Crowdfunding Page:** https://www.generosity.com/community-fundraising/civiwiki-org-plugging-in-democracy
