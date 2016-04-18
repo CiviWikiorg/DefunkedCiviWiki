@@ -77,8 +77,8 @@
     <div class="col l11">
         <ul class="collection friend-requests">
             <li class="collection-item avatar <%=request.id %>">
-                <img class="circle" src="/static/img/team_profile/team_default.png">
-                <span class="title"><%- request.first_name %> <%- request.last_name%></span> 
+                <img class="circle" id="friend_img" src="/static/img/team_profile/team_default.png">
+                <span class="title" id="friend_info"><%- request.first_name %> <%- request.last_name%></span> 
 
             </li>
         </ul>
@@ -114,7 +114,6 @@
 
 <script>
     var userModel = new Backbone.Model({{result|safe}});
-    userModel.on({'change': Backbone.Events.trigger("userModelChanged")}); //trigger that shows userModel changed 
     
     var accountBaseView = new AccountBaseView({
         userModel: userModel

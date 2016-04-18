@@ -17,9 +17,6 @@ var AccountBaseView = Backbone.View.extend({
         });
 
         this.friendsTab.render();
-
-        Backbone.Events.on("userModelChanged", this.friendsTab.changed()); //still struggles to detect change
-
     },
 
     render: function () {

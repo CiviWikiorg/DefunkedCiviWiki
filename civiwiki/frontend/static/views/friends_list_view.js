@@ -12,19 +12,18 @@ var FriendsListView = Backbone.View.extend({
       _this.userModel = options.userModel; 
       _this.friend_requests = options.friend_requests;
       _this.friends = _this.userModel.toJSON().friends;
-
       console.log(_this.userModel);
+      _this.listenTo(_this.userModel, 'change', _this.render); //supposed to listen for a change in the friend_requests attribute of the model and rerender the view accordingly
 
-      //_this.listenTo(_this.userModel, 'change', _this.changed); //supposed to listen for a change in the friend_requests attribute of the model and rerender the view accordingly
+
     }, 
 
     render: function(){
       var _this = this; 
-
        _this.$el.empty().append(_this.friendsTemplate({
             //temporary friend data 
-            friends : [{first_name: 'Mitchell', last_name: 'West'}, {first_name: 'Dan', last_name:'Borstelmann'}, {first_name: 'Darius', last_name: 'Calliet'}, {first_name: 'Joohee', last_name:'Lee'}], 
-            //friends: _this.friends,
+            //friends : [{first_name: 'Mitchell', last_name: 'West'}, {first_name: 'Dan', last_name:'Borstelmann'}, {first_name: 'Darius', last_name: 'Calliet'}, {first_name: 'Joohee', last_name:'Lee'}], 
+            friends: _this.friends,
             friend_requests: _this.friend_requests 
         }));      
     }, 
@@ -72,7 +71,14 @@ var FriendsListView = Backbone.View.extend({
       var _this = this; 
 
       var class_name = $(event.target).parent().attr('class'); //gets the ID of rejected friend
-      var accepted_id = class_name.slice(class_name.lastIndexOf(' ') + 1);       
+      var accepted_id = class_name.slice(class_name.lastIndexOf(' ') + 1);     
+
+      var f_requests = _this.userModel.toJSON().friend_requests; 
+      var accept_index = $.grep(f_requests, function(e) {return e.id == accepted_id; });
+      var friend_info = this.$el.find('#friend_info').text();
+
+      var friend_img = this.$el.find('#friend_img').attr('src');
+
       $.ajax({
         type: 'POST', 
         url: 'api/acceptfriend', 
@@ -87,39 +93,52 @@ var FriendsListView = Backbone.View.extend({
         }
       });
 
+      //if friend exists in friends then do not display user in friend_requests
+      var new_friend = '<li class="collection-item avatar"><img class="circle" src="'+friend_img+'"><span class="title">'+friend_info+'</span><a href="#!" class="secondary-content remove '+accepted_id+'"><i class="material-icons">delete</i></a></li>';
+      _this.userModel.set({
+            friend_requests: _this.userModel.toJSON().friend_requests.splice(accept_index, 1) //deletes user from friend_requests list on clientside userModel
+      }); 
+
+      this.$el.find('.friends').append(new_friend);
+
     }, 
     rejectFriend: function(event){
       var _this = this; 
 
-      var class_name = $(event.target).parent().attr('class'); //gets the ID of rejected friend
-      var rejected_id = class_name.slice(class_name.lastIndexOf(' ') + 1); 
+     
+      var class_name = $(event.target).parent().attr('class'); 
+      var rejected_id = class_name.slice(class_name.lastIndexOf(' ') + 1); //grabs ID of rejected friend_request
 
       var f_requests = _this.userModel.toJSON().friend_requests;
-      var friend_index = $.grep(f_requests, function(e){ return e.id == rejected_id; });
-      f_requests.splice(friend_index, 1);
+      var friend_index = $.grep(f_requests, function(e){ return e.id == rejected_id; }); //finds object in friend_requests to delete
 
-      _this.userModel.set({friend_requests: f_requests}); //changes the userModel on the frontend to show that there's a change
-      console.log(_this.userModel); //show that friend_requests has been modified 
-      
-      // $.ajax({
-      //   type:'POST', 
-      //   url:'api/rejectfriend',
-      //   data:{
-      //     friend: rejected_id, 
-      //   }, 
-      //   success: function(data){
-      //     Materialize.toast('Friend successfully rejected', 3000); //removes friends from friend_requests list
-      //   }, 
-      //   error: function(data){
-      //     Materialize.toast('Friend not rejected', 3000);
-      //   }
-      // });
+      $.ajax({
+        type:'POST', 
+        url:'api/rejectfriend',
+        data:{
+          friend: rejected_id, 
+        }, 
+        success: function(data){
+          _this.userModel.set({
+            friend_requests: _this.userModel.toJSON().friend_requests.splice(friend_index, 1) //removes friend from friend_requests from the userModel on the client side
+          });
+
+          Materialize.toast('Friend successfully rejected', 3000); 
+        }, 
+        error: function(data){
+          Materialize.toast('Friend not rejected', 3000);
+        }
+      });
     }, 
     removeFriend: function(event){
       var _this = this; 
 
       var class_name = $(event.target).parent().attr('class'); //gets the ID of rejected friend
       var removed_id = class_name.slice(class_name.lastIndexOf(' ') + 1); 
+
+      var friends = _this.userModel.toJSON().friends;
+      var friend_index = $.grep(friends, function(e){ return e.id == removed_id; }); //finds object in friends to delete
+
 
       $.ajax({
         type: 'POST', 
@@ -128,15 +147,16 @@ var FriendsListView = Backbone.View.extend({
           friend: removed_id
         },
         success: function(data){
+          _this.userModel.set({
+            friends: _this.userModel.toJSON().friends.splice(friend_index, 1) //removes friend from friend_requests from the userModel on the client side
+          });
+
           Materialize.toast('Friend successfully removed', 3000);
         }, 
         error: function(data){
           Materialize.toast('Friend not successfully removed', 3000);
         }
       });
-    },
-    changed: function(){
-      console.log('changed');
     }
 
 });
