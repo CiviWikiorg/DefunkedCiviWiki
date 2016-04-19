@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 """
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-from utils.db_info import DATABASES as database_creds
 import os
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 
@@ -77,9 +76,7 @@ WSGI_APPLICATION = 'civiwiki.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
 DEBUG = True
-BASE_URL = 'localhost:8000'
 if 'RDS_DB_NAME' in os.environ:
-    BASE_URL = 'civiwiki.org'
     DATABASE = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -103,19 +100,19 @@ elif 'CIVIWIKI_LOCAL' in os.environ and int(os.environ['CIVIWIKI_LOCAL']):
     }
     print 'Database: localhost '
 else:
-    DATABASES = database_creds
-    print 'Database: Custom'
+    DATABASES = {
+        'default': {
+            'HOST':'civiwiki.cwnas2j52gab.us-west-2.rds.amazonaws.com',
+            'PORT': '5432',
+            'NAME': 'civiwiki',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'USER': 'civiwiki',
+            'PASSWORD': 'changecivic2',
+        },
+    }
+    print 'Database: EC2'
 
 LOGIN_URL = '/login'
-
-# Email settings
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'mitchell.west@civiwiki.org'
-EMAIL_HOST_PASSWORD = 'Hamilton8'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-DEFAULT_FROM_EMAIL = 'mitchell.west@civiwiki.org'
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
