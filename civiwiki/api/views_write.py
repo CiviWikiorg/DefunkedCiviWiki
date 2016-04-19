@@ -240,7 +240,7 @@ def acceptFriend(request):
 		if str(stranger.id) not in account.friend_requests:
 			raise Exception("No request was sent from this person.")
 
-		account.friend_requests = [fr for fr in account.friend_requests if fr != stranger.id]
+		account.friend_requests = [fr for fr in account.friend_requests if fr != str(stranger.id)]
 		account.friends.add(stranger)
 		account.save()
 		return JsonResponse({"result":Account.objects.serialize(account, "friends")}, safe=False)
