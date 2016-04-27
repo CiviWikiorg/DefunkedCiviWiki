@@ -21,8 +21,6 @@ var FriendsListView = Backbone.View.extend({
     render: function(){
       var _this = this; 
        _this.$el.empty().append(_this.friendsTemplate({
-            //temporary friend data 
-            //friends : [{first_name: 'Mitchell', last_name: 'West'}, {first_name: 'Dan', last_name:'Borstelmann'}, {first_name: 'Darius', last_name: 'Calliet'}, {first_name: 'Joohee', last_name:'Lee'}], 
             friends: _this.friends,
             friend_requests: _this.friend_requests 
         }));      
@@ -70,6 +68,8 @@ var FriendsListView = Backbone.View.extend({
     acceptFriend: function(event){
       var _this = this; 
 
+      //this should all occur when a friend is successfully added but then it gets really choppy/is quite slow 
+
       var class_name = $(event.target).parent().attr('class'); //gets the ID of rejected friend
       var accepted_id = class_name.slice(class_name.lastIndexOf(' ') + 1);     
 
@@ -79,6 +79,14 @@ var FriendsListView = Backbone.View.extend({
 
       var friend_img = this.$el.find('#friend_img').attr('src');
 
+      //friend that will be added to friends list 
+      var new_friend = '<li class="collection-item avatar"><img class="circle" src="'+friend_img+'"><span class="title">'+friend_info+'</span><a href="#!" class="secondary-content remove '+accepted_id+'"><i class="material-icons">delete</i></a></li>';
+      _this.userModel.set({
+          friend_requests: _this.userModel.toJSON().friend_requests.splice(accept_index, 1) //deletes user from friend_requests list on clientside userModel
+      }); 
+
+      this.$el.find('.friends').append(new_friend);
+      
       $.ajax({
         type: 'POST', 
         url: 'api/acceptfriend', 
@@ -93,14 +101,6 @@ var FriendsListView = Backbone.View.extend({
         }
       });
 
-      //if friend exists in friends then do not display user in friend_requests
-      var new_friend = '<li class="collection-item avatar"><img class="circle" src="'+friend_img+'"><span class="title">'+friend_info+'</span><a href="#!" class="secondary-content remove '+accepted_id+'"><i class="material-icons">delete</i></a></li>';
-      _this.userModel.set({
-            friend_requests: _this.userModel.toJSON().friend_requests.splice(accept_index, 1) //deletes user from friend_requests list on clientside userModel
-      }); 
-
-      this.$el.find('.friends').append(new_friend);
-
     }, 
     rejectFriend: function(event){
       var _this = this; 
@@ -110,7 +110,7 @@ var FriendsListView = Backbone.View.extend({
       var rejected_id = class_name.slice(class_name.lastIndexOf(' ') + 1); //grabs ID of rejected friend_request
 
       var f_requests = _this.userModel.toJSON().friend_requests;
-      var friend_index = $.grep(f_requests, function(e){ return e.id == rejected_id; }); //finds object in friend_requests to delete
+      var friend_index = _this.getIndex(f_requests, rejected_id);
 
       $.ajax({
         type:'POST', 
@@ -133,12 +133,11 @@ var FriendsListView = Backbone.View.extend({
     removeFriend: function(event){
       var _this = this; 
 
-      var class_name = $(event.target).parent().attr('class'); //gets the ID of rejected friend
+      var class_name = $(event.target).parent().attr('class'); //gets the ID of removed friend
       var removed_id = class_name.slice(class_name.lastIndexOf(' ') + 1); 
 
       var friends = _this.userModel.toJSON().friends;
-      var friend_index = $.grep(friends, function(e){ return e.id == removed_id; }); //finds object in friends to delete
-
+      var friend_index = _this.getIndex(friends, removed_id);
 
       $.ajax({
         type: 'POST', 
@@ -157,6 +156,10 @@ var FriendsListView = Backbone.View.extend({
           Materialize.toast('Friend not successfully removed', 3000);
         }
       });
+    }, 
+    getIndex: function(attr, id){ //returns the index of which the friend or friend_request id is in the userModel attributes 
+      var index =  $.grep(attr, function(e){return e.id == id});
+      return index;
     }
 
 });
