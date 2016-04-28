@@ -18,10 +18,10 @@ def topTen(request):
 	topic_id = request.POST.get('id', 1)
 	result = [{'id': c.id, 'title': c.title, 'body': c.body, 'shortened': c.body[0:150],
                    'visits':c.visits, 'author':c.creator, 'rank':c.rank(),
-                   'related-civis':len(c.and_positive), 'response-civis':len(c.and_negative),
-                   'linked-causes':len(c.at),
-                   'linked-solutions':len(reduce(lambda x,y: x|set(y),
-                                                 [child.at for child in c.at]))
+                   'related_civis':len(c.and_positive), 'response_civis':len(c.and_negative),
+                   'linked_causes':len(c.at),
+                   'linked_solutions':len(reduce(lambda x,y: x|set(y),
+                                                 [Civi.objects.filter(id=int(child))[0].at for child in c.at],set()))
                    } for c in Civi.objects.filter(topic_id=int(topic_id), type='I')]
 
         #Built this in case we are interested in causes linked to by all adjacent civis

@@ -44,14 +44,14 @@
         <% _.each(issues, function(issue) { %>
             <div class="issues-item card" data-id="<%= issue.id %>">
                 <div class="card-content">
-                    <span class="card-title"><%- issue.title %></span>
+                    <span class="card-title black-text bold-text"><%- issue.title %></span>
                     <p class="gray-text"><%- issue.shortened %></p>
                     <br>
                     <hr>
-                    <p class="black">Visits: <%- issue.visits%>  Ranking: <%-issue.rank%></p>
-                    <p class="black">Related: <%- issue.related-civis%>  Responses: <%-issue.response-civis%></p>
-                    <p class="black">Causes: <%- issue.linked-causes%>  Solutions: <%-issue.linked-solutions%></p>
-                    <p class="black">Author: <%- issue.author%></p>
+                    <p class="black-text">Visits: <%- issue.visits%>  Ranking: <%-issue.rank%></p>
+                    <p class="black-text">Related: <%- issue.related_civis%>  Responses: <%-issue.response_civis%></p>
+                    <p class="black-text">Causes: <%- issue.linked_causes%>  Solutions: <%-issue.linked_solutions%></p>
+                    <p class="black-text">Author: <%- issue.author%></p>
                 </div>
                 <div class="card-action">
                     <a href="#" class="issues-item-link">View Civi</a>
@@ -63,14 +63,14 @@
         <% _.each(issuesSecond, function(issue) { %>
             <div class="issues-item card" data-id="<%= issue.id %>">
                 <div class="card-content">
-                    <span class="card-title"><%- issue.title %></span>
+                    <span class="card-title black-text bold-text"><%- issue.title %></span>
                     <p class="gray-text"><%- issue.shortened %></p>
                     <br>
                     <hr>
-                    <p class="black">Visits: <%- issue.visits%>  Ranking: <%-issue.rank%></p>
-                    <p class="black">Related: <%- issue.related-civis%>  Responses: <%-issue.response-civis%></p>
-                    <p class="black">Causes: <%- issue.linked-causes%>  Solutions: <%-issue.linked-solutions%></p>
-                    <p class="black">Author: <%- issue.author%></p>
+                    <p class="black-text">Visits: <%- issue.visits%>  Ranking: <%-issue.rank%></p>
+                    <p class="black-text">Related: <%- issue.related_civis%>  Responses: <%-issue.response_civis%></p>
+                    <p class="black-text">Causes: <%- issue.linked_causes%>  Solutions: <%-issue.linked_solutions%></p>
+                    <p class="black-text">Author: <%- issue.author%></p>
                 </div>
                 <div class="card-action">
                     <a href="#" class="issues-item-link">View Civi</a>

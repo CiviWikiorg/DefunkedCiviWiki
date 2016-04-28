@@ -107,7 +107,7 @@ var DatabaseView = Backbone.View.extend({
                 }));
 
                 _this.customCSS();
-                _this.customRowHeight();
+                //_this.customRowHeight();
             }
         });
     }
